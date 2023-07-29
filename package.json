@@ -1,0 +1,19 @@
+{
+  "name": "actividad3_materialapoyo",
+  "version": "1.0.0",
+  "description": "Completad las funciones siguiendo las instrucciones del comentario en el pichero `actividad.js`. No deberíais tener que  modificar el código en `ImageHandler.js` en ningun caso.",
+  "main": "ImageHandler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "deasync": "^0.1.28",
+    "deasync-promise": "^1.0.1",
+    "get-pixels": "^3.3.3",
+    "ndarray": "^1.0.19",
+    "save-pixels": "^2.3.6"
+  }
+}

@@ -136,7 +136,7 @@ function blackAndWhiteConverter() {
       // Calculamos el valor promedio de los canales R, G y B
       let avg = Math.round((pixel[0] + pixel[1] + pixel[2]) / 3);
 
-      // Establecemos los canales R, G y B en 0 o 255 según el umbral
+      // Establecemos los canales R, G y B en 0 o 255 según el promedio
       if (avg > 128) {
         pixel[0] = 255; // Rojo
         pixel[1] = 255; // Verde

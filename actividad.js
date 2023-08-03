@@ -106,7 +106,7 @@ function greyConverter() {
   for (let i = 0; i < pixels.length; i++) {
     for (let j = 0; j < pixels[i].length; j++) {
       let pixel = pixels[i][j];
-      let avg = Math.Round((pixel[0] + pixel[1] + pixel[2]) / 3)
+      let avg = Math.round((pixel[0] + pixel[1] + pixel[2]) / 3)
 
       pixel[0] = avg;
       pixel[1] = avg;
@@ -127,7 +127,6 @@ function greyConverter() {
 function blackAndWhiteConverter() {
   let outputPath = "output/tucan_black_and_white.jpg";
   let pixels = handler.getPixels();
-  const umbral = 80;
 
   for (let i = 0; i < pixels.length; i++) {
     for (let j = 0; j < pixels[i].length; j++) {
@@ -135,17 +134,17 @@ function blackAndWhiteConverter() {
       let pixel = pixels[i][j];
 
       // Calculamos el valor promedio de los canales R, G y B
-      let grayValue = (pixel[0] + pixel[1] + pixel[2]) / 3;
+      let avg = Math.round((pixel[0] + pixel[1] + pixel[2]) / 3);
 
       // Establecemos los canales R, G y B en 0 o 255 según el umbral
-      if (grayValue > umbral) {
-        pixel[0] = 255; // Red channel
-        pixel[1] = 255; // Green channel
-        pixel[2] = 255; // Blue channel
+      if (avg > 128) {
+        pixel[0] = 255; // Rojo
+        pixel[1] = 255; // Verde
+        pixel[2] = 255; // Azul
       } else {
-        pixel[0] = 0; // Red channel
-        pixel[1] = 0; // Green channel
-        pixel[2] = 0; // Blue channel
+        pixel[0] = 0; // Rojo
+        pixel[1] = 0; // Verde
+        pixel[2] = 0; // Azul
       }
     }
   }
@@ -164,25 +163,21 @@ function scaleDown() {
 
   let newWidth = handler.getShape()[1] / 2;
   let newHeight = handler.getShape()[0] / 2;
-  let newPixels = new Array(newHeight)
-    .fill(null)
-    .map(() => new Array(newWidth).fill(null));
 
-  for (let i = 0; i < newHeight; i++) {
-    for (let j = 0; j < newWidth; j++) {
-      const originalRow = i * 2;
-      const originalCol = j * 2;
-      newPixels[i][j] = pixels[originalRow][originalCol];
-    }
-  }
-
-  handler.savePixels(
-    newPixels,
-    outputPath,
-    handler.getShape()[0] / 2,
-    handler.getShape()[1] / 2
+  // Utilizo Array.from en vez de for o un foreach que agregaría complejidad
+  let newPixels = Array.from(
+    { length: newHeight },
+    // Ignoro el elemento actual
+    (_, i) => Array.from(
+      { length: newWidth },
+      // Ignoro el elemento actual
+      (_, j) => pixels[i * 2][j * 2]
+    )
   );
+
+  handler.savePixels(newPixels, outputPath, newHeight, newWidth);
 }
+
 
 /**
  * Esta función debe reducir el brillo de la imagen según el parámetro qe recibe la función.
@@ -193,18 +188,17 @@ function dimBrightness(dimFactor) {
   let outputPath = "output/tucan_dimed.jpg";
   let pixels = handler.getPixels();
 
-  for (let i = 0; i < pixels.length; i++) {
-    for (let j = 0; j < pixels[i].length; j++) {
-      let pixel = pixels[i][j];
-
-      pixel[0] = Math.min(255, Math.max(0, pixel[0] * dimFactor));
-      pixel[1] = Math.min(255, Math.max(0, pixel[1] * dimFactor));
-      pixel[2] = Math.min(255, Math.max(0, pixel[2] * dimFactor));
-    }
-  }
+  pixels.forEach(row => {
+    row.forEach(pixel => {
+      pixel.forEach((color, index) => {
+        pixel[index] = Math.min(255, Math.max(0, color * dimFactor));
+      });
+    });
+  });
 
   handler.savePixels(pixels, outputPath);
 }
+
 
 /**
  * Esta función debe invertir el color de la imagen.
@@ -217,18 +211,17 @@ function invertColors() {
   let outputPath = "output/tucan_inverse.jpg";
   let pixels = handler.getPixels();
 
-  for (let i = 0; i < pixels.length; i++) {
-    for (let j = 0; j < pixels[i].length; j++) {
-      let pixel = pixels[i][j];
-
-      pixel[0] = 255 - pixel[0];
-      pixel[1] = 255 - pixel[1];
-      pixel[2] = 255 - pixel[2];
-    }
-  }
+  pixels.forEach(row => {
+    row.forEach(pixel => {
+      pixel.forEach((color, index) => {
+        pixel[index] = 255 - color;
+      });
+    });
+  });
 
   handler.savePixels(pixels, outputPath);
 }
+
 
 /**
  * merge - Junta dos imagenes con cierto factor de fusion
@@ -247,29 +240,27 @@ function merge(alphaFirst, alphaSecond) {
   let catPixels = catHandler.getPixels();
   let dogPixels = dogHandler.getPixels();
 
-  let pixels = [];
-
-  for (let i = 0; i < catPixels.length; i++) {
-    let newRow = [];
-    for (let j = 0; j < catPixels[i].length; j++) {
-      let catPixel = catPixels[i][j];
+   // Creamos un nuevo array de píxeles mediante el mapeo de cada fila y cada pixel en catPixels.
+  // Utilizamos 'Array.from' para crear un nuevo pixel que es una combinación del pixel del gato y el pixel del perro.
+  let pixels = catPixels.map((row, i) => 
+    row.map((catPixel, j) => {
+      // Para cada pixel de gato, obtenemos el correspondiente pixel de perro
       let dogPixel = dogPixels[i][j];
 
-      let mergedRed = catPixel[0] * alphaFirst + dogPixel[0] * alphaSecond;
-      let mergedGreen = catPixel[1] * alphaFirst + dogPixel[1] * alphaSecond;
-      let mergedBlue = catPixel[2] * alphaFirst + dogPixel[2] * alphaSecond;
+      // Retornamos un nuevo pixel que es una combinación del pixel de gato y el de perro
+      return Array.from(catPixel, (color, index) => {
+        // Calculamos el nuevo color. Esto se hace multiplicando cada color del pixel de gato y el pixel de perro por sus respectivos factores alfa, y sumando los resultados.
+        let mergedColor = color * alphaFirst + dogPixel[index] * alphaSecond;
 
-      mergedRed = Math.min(255, Math.max(0, mergedRed));
-      mergedGreen = Math.min(255, Math.max(0, mergedGreen));
-      mergedBlue = Math.min(255, Math.max(0, mergedBlue));
-
-      newRow.push([mergedRed, mergedGreen, mergedBlue]);
-    }
-    pixels.push(newRow);
-  }
+        // Nos aseguramos de que el color resultante esté dentro del rango de 0 a 255.
+        return Math.min(255, Math.max(0, mergedColor));
+      });
+    })
+  );
 
   dogHandler.savePixels(pixels, outputPath);
 }
+
 
 /**
  * Programa de prueba
@@ -289,7 +280,7 @@ function merge(alphaFirst, alphaSecond) {
  *     Negativo: 8
  *     Fusion de imagenes: 9
  */
-let optionN = 3;
+let optionN = 9;
 
 switch (optionN) {
     case 1: redConverter(); break;

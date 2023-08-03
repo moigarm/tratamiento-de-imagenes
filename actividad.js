@@ -1,36 +1,36 @@
-const ImageHandler = require('./ImageHandler.js')
+const ImageHandler = require("./ImageHandler.js");
 
-
-let path = 'input/tucan.jpg';
+let path = "input/tucan.jpg";
 let handler = new ImageHandler(path);
-
 
 /**
  * Ejemplo de construccion de una imagen
  */
 function ejemplo() {
-
-    let outputPath = 'output/ejemplo.jpg';
-    let pixeles = [];
-    let filas = 2;
-    let columnas = 2;
-    for (let i = 0; i < filas; i++) {
-        let nuevaFila = [];
-        console.log("Fila: " + i);
-        for (let j = 0; j < columnas; j++) {
-            console.log("Columna:" + j)
-            let pixel = [0, 0, 0]; // R G B -> Red Green Blue -> Rojo Verde Azul
-            if ((i + j) % 2 === 0) { // Si la suma de la fila y la columna es par....
-                pixel = [255, 255, 255];
-            }
-            console.log("Vamos a añadir el pixel " + pixel + " a la fila " + i + " columna " + j)
-            nuevaFila.push(pixel);
-        }
-        console.log(nuevaFila)
-        pixeles.push(nuevaFila);
+  let outputPath = "output/ejemplo.jpg";
+  let pixeles = [];
+  let filas = 2;
+  let columnas = 2;
+  for (let i = 0; i < filas; i++) {
+    let nuevaFila = [];
+    console.log("Fila: " + i);
+    for (let j = 0; j < columnas; j++) {
+      console.log("Columna:" + j);
+      let pixel = [0, 0, 0]; // R G B -> Red Green Blue -> Rojo Verde Azul
+      if ((i + j) % 2 === 0) {
+        // Si la suma de la fila y la columna es par....
+        pixel = [255, 255, 255];
+      }
+      console.log(
+        "Vamos a añadir el pixel " + pixel + " a la fila " + i + " columna " + j
+      );
+      nuevaFila.push(pixel);
     }
-    console.log(pixeles);
-    handler.savePixels(pixeles, outputPath, filas, columnas);
+    console.log(nuevaFila);
+    pixeles.push(nuevaFila);
+  }
+  console.log(pixeles);
+  handler.savePixels(pixeles, outputPath, filas, columnas);
 }
 
 /**
@@ -39,26 +39,36 @@ function ejemplo() {
  * Una forma de conseguirlo es simplemente poner los canales G y B a 0 para cada pixel.
  */
 function redConverter() {
-    let outputPath = 'output/tucan_red.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_red.jpg";
+  let pixels = handler.getPixels();
 
-    //Aqui tu codigo
+  pixels.forEach((row, i) => {
+    row.forEach((pixel, j) => {
+      pixels[i][j][1] = 0; // Verde a cero
+      pixels[i][j][2] = 0; // Azul a cero
+    });
+  });
 
-    handler.savePixels(pixels, outputPath);
+  handler.savePixels(pixels, outputPath);
 }
 
 /**
  * Esta función debe transformar una imagen en escala de verdes.
- * 
+ *
  * Una forma de conseguirlo es simplemente poner los canales R y B a 0 para cada pixel.
  */
 function greenConverter() {
-    let outputPath = 'output/tucan_green.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_green.jpg";
+  let pixels = handler.getPixels();
 
-    //Aqui tu codigo
+  pixels.forEach((row, i) => {
+    row.forEach((pixel, j) => {
+      pixels[i][j][0] = 0; // Rojo a cero
+      pixels[i][j][2] = 0; // Azul a cero
+    });
+  });
 
-    handler.savePixels(pixels, outputPath);
+  handler.savePixels(pixels, outputPath);
 }
 
 /**
@@ -67,12 +77,17 @@ function greenConverter() {
  * Una forma de conseguirlo es simplemente poner los canales R y G a 0 para cada pixel.
  */
 function blueConverter() {
-    let outputPath = 'output/tucan_blue.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_blue.jpg";
+  let pixels = handler.getPixels();
 
-    //Aqui tu codigo
+  pixels.forEach((row, i) => {
+    row.forEach((pixel, j) => {
+      pixels[i][j][0] = 0; // Rojo a cero
+      pixels[i][j][1] = 0; // Verde a cero
+    });
+  });
 
-    handler.savePixels(pixels, outputPath);
+  handler.savePixels(pixels, outputPath);
 }
 
 /**
@@ -85,12 +100,21 @@ function blueConverter() {
  * lo debemos transformar en el pixel [140, 140, 140].
  */
 function greyConverter() {
-    let outputPath = 'output/tucan_grey.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_grey.jpg";
+  let pixels = handler.getPixels();
 
-    //Aqui tu codigo
+  for (let i = 0; i < pixels.length; i++) {
+    for (let j = 0; j < pixels[i].length; j++) {
+      let pixel = pixels[i][j];
+      let avg = Math.Round((pixel[0] + pixel[1] + pixel[2]) / 3)
 
-    handler.savePixels(pixels, outputPath);
+      pixel[0] = avg;
+      pixel[1] = avg;
+      pixel[2] = avg;
+    }
+  }
+
+  handler.savePixels(pixels, outputPath);
 }
 
 /**
@@ -101,12 +125,32 @@ function greyConverter() {
  * transformar el pixel en blanco [255, 255, 255].
  */
 function blackAndWhiteConverter() {
-    let outputPath = 'output/tucan_black_and_white.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_black_and_white.jpg";
+  let pixels = handler.getPixels();
+  const umbral = 80;
 
-    //Aqui tu codigo
+  for (let i = 0; i < pixels.length; i++) {
+    for (let j = 0; j < pixels[i].length; j++) {
+      // Accede al pixel en la posición (i, j)
+      let pixel = pixels[i][j];
 
-    handler.savePixels(pixels, outputPath);
+      // Calculamos el valor promedio de los canales R, G y B
+      let grayValue = (pixel[0] + pixel[1] + pixel[2]) / 3;
+
+      // Establecemos los canales R, G y B en 0 o 255 según el umbral
+      if (grayValue > umbral) {
+        pixel[0] = 255; // Red channel
+        pixel[1] = 255; // Green channel
+        pixel[2] = 255; // Blue channel
+      } else {
+        pixel[0] = 0; // Red channel
+        pixel[1] = 0; // Green channel
+        pixel[2] = 0; // Blue channel
+      }
+    }
+  }
+
+  handler.savePixels(pixels, outputPath);
 }
 
 /**
@@ -115,26 +159,51 @@ function blackAndWhiteConverter() {
  * Una forma de conseguirlo es quitar los valores de las filas y columnas pares.
  */
 function scaleDown() {
-    let outputPath = 'output/tucan_scale_down.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_scale_down.jpg";
+  let pixels = handler.getPixels();
 
-    //Aqui tu codigo
+  let newWidth = handler.getShape()[1] / 2;
+  let newHeight = handler.getShape()[0] / 2;
+  let newPixels = new Array(newHeight)
+    .fill(null)
+    .map(() => new Array(newWidth).fill(null));
 
-    handler.savePixels(nuevaImagen, outputPath, handler.getShape()[0] / 2, handler.getShape()[1] / 2);
+  for (let i = 0; i < newHeight; i++) {
+    for (let j = 0; j < newWidth; j++) {
+      const originalRow = i * 2;
+      const originalCol = j * 2;
+      newPixels[i][j] = pixels[originalRow][originalCol];
+    }
+  }
+
+  handler.savePixels(
+    newPixels,
+    outputPath,
+    handler.getShape()[0] / 2,
+    handler.getShape()[1] / 2
+  );
 }
 
 /**
- * Esta función debe reducir el brillo de la imagen según el parámetro qye recibe la función.
+ * Esta función debe reducir el brillo de la imagen según el parámetro qe recibe la función.
  *
  * Una forma de conseguirlo es dividir el valor de cada pixel por el parámetro dimFactor.
  */
 function dimBrightness(dimFactor) {
-    let outputPath = 'output/tucan_dimed.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_dimed.jpg";
+  let pixels = handler.getPixels();
 
-    //Aqui tu codigo
+  for (let i = 0; i < pixels.length; i++) {
+    for (let j = 0; j < pixels[i].length; j++) {
+      let pixel = pixels[i][j];
 
-    handler.savePixels(pixels, outputPath);
+      pixel[0] = Math.min(255, Math.max(0, pixel[0] * dimFactor));
+      pixel[1] = Math.min(255, Math.max(0, pixel[1] * dimFactor));
+      pixel[2] = Math.min(255, Math.max(0, pixel[2] * dimFactor));
+    }
+  }
+
+  handler.savePixels(pixels, outputPath);
 }
 
 /**
@@ -145,12 +214,20 @@ function dimBrightness(dimFactor) {
  * Por ejemplo, si un pixel tiene valor [10, 20, 50] su nuevo valor sera [255 - 10, 255 - 20, 255 - 50] => [245, 235, 205]
  */
 function invertColors() {
-    let outputPath = 'output/tucan_inverse.jpg';
-    let pixels = handler.getPixels();
+  let outputPath = "output/tucan_inverse.jpg";
+  let pixels = handler.getPixels();
 
-    //Aqui tu codigo
+  for (let i = 0; i < pixels.length; i++) {
+    for (let j = 0; j < pixels[i].length; j++) {
+      let pixel = pixels[i][j];
 
-    handler.savePixels(pixels, outputPath);
+      pixel[0] = 255 - pixel[0];
+      pixel[1] = 255 - pixel[1];
+      pixel[2] = 255 - pixel[2];
+    }
+  }
+
+  handler.savePixels(pixels, outputPath);
 }
 
 /**
@@ -163,20 +240,36 @@ function invertColors() {
  * @param alphaSecond Parametro a aplicar sobre la segunda imagen
  */
 function merge(alphaFirst, alphaSecond) {
-    let catHandler = new ImageHandler('input/cat.jpg');
-    let dogHandler = new ImageHandler('input/dog.jpg');
-    let outputPath = 'output/merged.jpg';
+  let catHandler = new ImageHandler("input/cat.jpg");
+  let dogHandler = new ImageHandler("input/dog.jpg");
+  let outputPath = "output/merged.jpg";
 
-    let catPixels = catHandler.getPixels();
-    let dogPixels = dogHandler.getPixels();
+  let catPixels = catHandler.getPixels();
+  let dogPixels = dogHandler.getPixels();
 
-    let pixels = [];
+  let pixels = [];
 
-    //Aqui tu codigo
+  for (let i = 0; i < catPixels.length; i++) {
+    let newRow = [];
+    for (let j = 0; j < catPixels[i].length; j++) {
+      let catPixel = catPixels[i][j];
+      let dogPixel = dogPixels[i][j];
 
-    dogHandler.savePixels(pixels, outputPath);
+      let mergedRed = catPixel[0] * alphaFirst + dogPixel[0] * alphaSecond;
+      let mergedGreen = catPixel[1] * alphaFirst + dogPixel[1] * alphaSecond;
+      let mergedBlue = catPixel[2] * alphaFirst + dogPixel[2] * alphaSecond;
+
+      mergedRed = Math.min(255, Math.max(0, mergedRed));
+      mergedGreen = Math.min(255, Math.max(0, mergedGreen));
+      mergedBlue = Math.min(255, Math.max(0, mergedBlue));
+
+      newRow.push([mergedRed, mergedGreen, mergedBlue]);
+    }
+    pixels.push(newRow);
+  }
+
+  dogHandler.savePixels(pixels, outputPath);
 }
-
 
 /**
  * Programa de prueba
@@ -196,7 +289,7 @@ function merge(alphaFirst, alphaSecond) {
  *     Negativo: 8
  *     Fusion de imagenes: 9
  */
-let optionN = 0;
+let optionN = 3;
 
 switch (optionN) {
     case 1: redConverter(); break;
